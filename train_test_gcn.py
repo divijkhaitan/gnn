@@ -10,7 +10,6 @@ import torch.nn.functional as F
 from sklearn.metrics import confusion_matrix
 from sklearn.metrics import f1_score
 import numpy as np
-
 """
     For GCNs
 """
@@ -19,7 +18,7 @@ def MAE(scores, targets):
     MAE = MAE.detach().item()
     return MAE
 
-def train_epoch_sparse(model, optimizer, device, data_loader, epoch):
+def train_epoch(model, optimizer, device, data_loader, epoch):
     model.train()
     epoch_loss = 0
     epoch_train_mae = 0
@@ -49,7 +48,7 @@ def train_epoch_sparse(model, optimizer, device, data_loader, epoch):
     
     return epoch_loss, epoch_train_mae, optimizer
 
-def evaluate_network_sparse(model, device, data_loader, epoch):
+def evaluate_network(model, device, data_loader, epoch):
     model.eval()
     epoch_test_loss = 0
     epoch_test_mae = 0
@@ -71,6 +70,5 @@ def evaluate_network_sparse(model, device, data_loader, epoch):
             nb_data += batch_targets.size(0)
         epoch_test_loss /= (iter + 1)
         epoch_test_mae /= (iter + 1)
-        
     return epoch_test_loss, epoch_test_mae
 

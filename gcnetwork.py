@@ -55,3 +55,12 @@ class GCNNet(nn.Module):
         # loss = nn.MSELoss()(scores,targets)
         loss = nn.L1Loss()(scores, targets)
         return loss
+
+def GCN(net_params):
+    return GCNNet(net_params)
+
+def gnn_model(MODEL_NAME, net_params):
+    models = {
+        'GCN': GCN
+    }
+    return models[MODEL_NAME](net_params)
