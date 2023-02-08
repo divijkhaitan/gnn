@@ -9,7 +9,7 @@ import dgl
     Thomas N. Kipf, Max Welling, Semi-Supervised Classification with Graph Convolutional Networks (ICLR 2017)
     http://arxiv.org/abs/1609.02907
 """
-from gcnlayer import GCNLayer
+import gcnlayer
 #from layers.mlp_readout_layer import MLPReadout
 
 class GCNNet(nn.Module):
@@ -30,8 +30,8 @@ class GCNNet(nn.Module):
         
         self.embedding_h = nn.Embedding(num_atom_type, hidden_dim)
         
-        self.layers = nn.ModuleList([GCNLayer(hidden_dim, hidden_dim, F.relu,dropout, self.batch_norm, self.residual) for _ in range(n_layers-1)])
-        self.layers.append(GCNLayer(hidden_dim, out_dim, F.relu,dropout, self.batch_norm, self.residual))
+        self.layers = nn.ModuleList([gcnlayer.GCNLayer(hidden_dim, hidden_dim, F.relu,dropout, self.batch_norm, self.residual) for _ in range(n_layers-1)])
+        self.layers.append(gcnlayer.GCNLayer(hidden_dim, out_dim, F.relu,dropout, self.batch_norm, self.residual))
         #self.MLP_layer = MLPReadout(out_dim, 1)   # 1 out dim since regression problem        
 
     def forward(self, g, h, e):
