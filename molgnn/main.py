@@ -7,10 +7,10 @@ import time
 import random
 import tensorboardX
 import torch.optim as optim
-import train_test_gcn
+import molgnn.train_test_gcn as train_test_gcn
 import glob
 import tqdm
-
+from torch.utils.data import DataLoader
 def view_model_param(MODEL_NAME, net_params):
     model = gcnetwork.gnn_model(MODEL_NAME, net_params)
     total_param = 0
@@ -92,7 +92,6 @@ def train_val_pipeline(MODEL_NAME, dataset, params, net_params, dirs):
                 writer.add_scalar('test/_mae', epoch_test_mae, epoch)
                 writer.add_scalar('learning_rate', optimizer.param_groups[0]['lr'], epoch)
 
-                        
                 t.set_postfix(time=time.time()-start, lr=optimizer.param_groups[0]['lr'],
                               train_loss=epoch_train_loss, val_loss=epoch_val_loss,
                               train_MAE=epoch_train_mae, val_MAE=epoch_val_mae,
