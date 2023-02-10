@@ -1,0 +1,6 @@
+aqsol_graph_raw
+datasets/asqol_graph_raw/atom_dict.pickle
+datasets/asqol_graph_raw/train.pickle
+datasets/asqol_graph_raw/test.pickle
+datasets/asqol_graph_raw/val.pickle
+datasets/asqol_graph_raw/bond_dict.pickle
