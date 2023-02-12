@@ -7,9 +7,10 @@ import time
 import random
 import tensorboardX
 import torch.optim as optim
-import molgnn.train_test_gcn as train_test_gcn
+import train_test_gcn as train_test_gcn
 import glob
 import tqdm
+import datasets
 from torch.utils.data import DataLoader
 def view_model_param(MODEL_NAME, net_params):
     model = gcnetwork.gnn_model(MODEL_NAME, net_params)
@@ -156,13 +157,14 @@ def main():
     
     config = {}
     # device
+    config['gpu'] = {}
     config['gpu']['use'] = False
     config['gpu']['id'] = 0
     device = torch.device("cpu")
     # model, dataset, out_dir
     MODEL_NAME = "GCN"
     DATASET_NAME = "AQSOL"
-    dataset = LoadData(DATASET_NAME)
+    dataset = datasets.MoleculeDataset(DATASET_NAME)
     out_dir = "results"
     # parameters
     params = {}
@@ -211,3 +213,4 @@ def main():
     net_params['total_param'] = view_model_param(MODEL_NAME, net_params)
     train_val_pipeline(MODEL_NAME, dataset, params, net_params, dirs)
 
+main()

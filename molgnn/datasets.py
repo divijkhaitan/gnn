@@ -18,11 +18,19 @@ def download_dataset():
     url = "https://www.dropbox.com/s/lzu9lmukwov12kt/aqsol_graph_raw.zip?dl=1"
     r = requests.get(url, allow_redirects=True)
     open("aqsol_graph_raw", "wb").write(r.content)
-    file_path = pathlib.Path("./datasets/aqsol_graph_raw.zip")
+    file_path = pathlib.Path("./data/aqsol_graph_raw.zip")
     if not file_path.is_file():
-        pathlib.Path("./datasets").mkdir(parents=True, exist_ok=True)
+        pathlib.Path("./data").mkdir(parents=True, exist_ok=True)
         with zipfile.ZipFile("aqsol_graph_raw", "r") as datafile:
-            datafile.extractall(path="./datasets")
+            datafile.extractall(path="./data")
+
+def save_pkl():
+    DATASET_NAME = 'AqSol'
+    dataset = MoleculeDatasetDGL(DATASET_NAME)
+    num_atom_type = dataset.num_atom_type
+    num_bond_type = dataset.num_bond_type
+    with open('/.data/AQSOL.pkl','wb') as f:
+        pickle.dump([dataset.train,dataset.val,dataset.test,num_atom_type,num_bond_type],f)
 
 class MoleculeDGL(torch.utils.data.Dataset):
     def __init__(self, data_dir, split, num_graphs=None):
@@ -99,13 +107,12 @@ class MoleculeDGL(torch.utils.data.Dataset):
         """
         return self.graph_lists[idx], self.graph_labels[idx]
     
-    
 class MoleculeAqSolDGL(torch.utils.data.Dataset):
     def __init__(self, data_dir, split, num_graphs=None):
         self.data_dir = data_dir
         self.split = split
         self.num_graphs = num_graphs
-        
+        data_dir = "./data/aqsol_graph_raw"
         with open(data_dir + "/%s.pickle" % self.split,"rb") as f:
             self.data = pickle.load(f)
         
@@ -156,7 +163,6 @@ class MoleculeAqSolDGL(torch.utils.data.Dataset):
     def __getitem__(self, idx):
         return self.graph_lists[idx], self.graph_labels[idx]
     
-    
 class MoleculeDatasetDGL(torch.utils.data.Dataset):
     def __init__(self, name='AqSol'):
         t0 = time.time()
@@ -164,14 +170,11 @@ class MoleculeDatasetDGL(torch.utils.data.Dataset):
         self.num_atom_type = 65 # known meta-info about the AqSol dataset; can be calculated as well 
         self.num_bond_type = 5 # known meta-info about the AqSol dataset; can be calculated as well
         
-        data_dir='./data/molecules'
-        data_dir='./data/molecules/asqol_graph_raw'
+        data_dir='data/asqol_graph_raw'
         self.train = MoleculeAqSolDGL(data_dir, 'train', num_graphs=7985)
         self.val = MoleculeAqSolDGL(data_dir, 'val', num_graphs=998)
         self.test = MoleculeAqSolDGL(data_dir, 'test', num_graphs=999)
         print("Time taken: {:.4f}s".format(time.time()-t0))
-        
-
 
 def self_loop(g):
     """
@@ -197,8 +200,6 @@ def self_loop(g):
     # However, we need this for the generic requirement of ndata and edata
     new_g.edata['feat'] = torch.zeros(new_g.number_of_edges())
     return new_g
-
-
 
 def positional_encoding(g, pos_enc_dim):
     """
@@ -227,8 +228,6 @@ def positional_encoding(g, pos_enc_dim):
     
     return g
 
-
-
 class MoleculeDataset(torch.utils.data.Dataset):
 
     def __init__(self, name):
@@ -238,7 +237,7 @@ class MoleculeDataset(torch.utils.data.Dataset):
         start = time.time()
         print("[I] Loading dataset %s..." % (name))
         self.name = name
-        data_dir = 'data/molecules/'
+        data_dir = 'data/aqsol_graph_raw'
         with open(data_dir+name+'.pkl',"rb") as f:
             f = pickle.load(f)
             self.train = f[0]
@@ -340,4 +339,4 @@ class MoleculeDataset(torch.utils.data.Dataset):
         self.val.graph_lists = [positional_encoding(g, pos_enc_dim) for g in self.val.graph_lists]
         self.test.graph_lists = [positional_encoding(g, pos_enc_dim) for g in self.test.graph_lists]
 
-download_dataset()
+save_pkl()
