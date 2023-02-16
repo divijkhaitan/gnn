@@ -9,7 +9,7 @@ import tensorboardX
 import torch.optim as optim
 import train_test_gcn as train_test_gcn
 import glob
-import tqdm
+from tqdm import tqdm
 import datasets
 from torch.utils.data import DataLoader
 def view_model_param(MODEL_NAME, net_params):

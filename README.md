@@ -1,0 +1,1 @@
+A repository to familiarise myself with graph neural networks for my independent study module.

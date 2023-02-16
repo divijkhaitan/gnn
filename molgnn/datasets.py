@@ -29,7 +29,7 @@ def save_pkl():
     dataset = MoleculeDatasetDGL(DATASET_NAME)
     num_atom_type = dataset.num_atom_type
     num_bond_type = dataset.num_bond_type
-    with open('/.data/AQSOL.pkl','wb') as f:
+    with open(r'/home/divijkhaitan/gnn/molgnn/data/AQSOL.pkl','wb') as f:
         pickle.dump([dataset.train,dataset.val,dataset.test,num_atom_type,num_bond_type],f)
 
 class MoleculeDGL(torch.utils.data.Dataset):
@@ -38,12 +38,12 @@ class MoleculeDGL(torch.utils.data.Dataset):
         self.split = split
         self.num_graphs = num_graphs
         
-        with open(data_dir + "/%s.pickle" % self.split,"rb") as f:
+        with open(data_dir / pathlib.Path(f"{self.split}/%s.pickle"),"rb") as f:
             self.data = pickle.load(f)
 
         if self.num_graphs in [10000, 1000]:
             # loading the sampled indices from file ./zinc_molecules/<split>.index
-            with open(data_dir + "/%s.index" % self.split,"r") as f:
+            with open(data_dir / "/%s.index" % self.split,"r") as f:
                 data_idx = [list(map(int, idx)) for idx in csv.reader(f)]
                 self.data = [ self.data[i] for i in data_idx[0] ]
 
@@ -110,10 +110,11 @@ class MoleculeDGL(torch.utils.data.Dataset):
 class MoleculeAqSolDGL(torch.utils.data.Dataset):
     def __init__(self, data_dir, split, num_graphs=None):
         self.data_dir = data_dir
-        self.split = split
+        self.split = split + r".pickle"
         self.num_graphs = num_graphs
-        data_dir = "./data/aqsol_graph_raw"
-        with open(data_dir + "/%s.pickle" % self.split,"rb") as f:
+        print(os.getcwd())
+        self.data_dir = data_dir / self.split #"\\wsl.localhost\Ubuntu\home\divijkhaitan\gnn\molgnn\data\asqol_graph_raw\train.pickle"
+        with open(pathlib.Path(os.getcwd()) / self.data_dir,"rb") as f:
             self.data = pickle.load(f)
         
         """
@@ -170,7 +171,8 @@ class MoleculeDatasetDGL(torch.utils.data.Dataset):
         self.num_atom_type = 65 # known meta-info about the AqSol dataset; can be calculated as well 
         self.num_bond_type = 5 # known meta-info about the AqSol dataset; can be calculated as well
         
-        data_dir='data/asqol_graph_raw'
+        data_dir=pathlib.Path("molgnn/" + "data/" + "aqsol_graph_raw")
+        print(data_dir)
         self.train = MoleculeAqSolDGL(data_dir, 'train', num_graphs=7985)
         self.val = MoleculeAqSolDGL(data_dir, 'val', num_graphs=998)
         self.test = MoleculeAqSolDGL(data_dir, 'test', num_graphs=999)
@@ -232,19 +234,24 @@ class MoleculeDataset(torch.utils.data.Dataset):
 
     def __init__(self, name):
         """
-            Loading Moleccular datasets
+            Loading Molecular datasets
         """
         start = time.time()
         print("[I] Loading dataset %s..." % (name))
-        self.name = name
-        data_dir = 'data/aqsol_graph_raw'
-        with open(data_dir+name+'.pkl',"rb") as f:
+        self.name = name + ".pkl"
+        data_dir = pathlib.Path('molgnn/data/')
+        with open(pathlib.Path(os.getcwd())/data_dir/self.name,"rb") as f:
             f = pickle.load(f)
             self.train = f[0]
             self.val = f[1]
             self.test = f[2]
             self.num_atom_type = f[3]
             self.num_bond_type = f[4]
+        indices = torch.arange(100)
+        self.train = torch.utils.data.Subset(self.train,indices=indices)
+        indices = torch.arange(10)
+        self.test = torch.utils.data.Subset(self.test,indices=indices)
+        self.val = torch.utils.data.Subset(self.val,indices=indices)
         print('train, test, val sizes :',len(self.train),len(self.test),len(self.val))
         print("[I] Finished loading.")
         print("[I] Data load time: {:.4f}s".format(time.time()-start))
@@ -339,4 +346,5 @@ class MoleculeDataset(torch.utils.data.Dataset):
         self.val.graph_lists = [positional_encoding(g, pos_enc_dim) for g in self.val.graph_lists]
         self.test.graph_lists = [positional_encoding(g, pos_enc_dim) for g in self.test.graph_lists]
 
-save_pkl()
+#/home/divijkhaitan/gnn/molgnn/data/aqsol_graph_raw/train.pickle
+#/home/divijkhaitan/gnn/molgnn/data/asqol_graph_raw/train.pickle
